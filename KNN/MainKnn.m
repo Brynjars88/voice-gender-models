@@ -1,6 +1,6 @@
 
-load 'voiceTest.mat'
-load 'voiceTrain.mat'
+load '../data/voiceTest.mat'
+load '../data/voiceTrain.mat'
 
 K=round(sqrt(length(training)),0);
 
