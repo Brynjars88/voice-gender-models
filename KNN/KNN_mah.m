@@ -1,7 +1,7 @@
 function [ prediction ] = KNN_mah( Test,Data,Target,K )
 %KNN function using mahalanobis distance
 %   
-sig=cov(Data);
+sig=cov(Data)+0.001*eye(length(cov(Data)));
 inv_sig=sig^(-1);
 for i=1:length(Data)
     
