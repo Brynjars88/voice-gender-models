@@ -54,7 +54,6 @@ for i=1:n
         uj=j*Step;
         Y_knn_ec=1:Step;
         Y_knn_mah=1:Step;
-        Y_com=1:Step;
         for z=lj:uj
         Y_knn_ec(z-lj+1)=kNNClassifier(data(z,:),data(Lower:upper,:),training(Lower:upper,21),15);
         Y_knn_mah(z-lj+1)=KNN_mah(data(z,:),data(Lower:upper,:),training(Lower:upper,21),15);
@@ -62,8 +61,8 @@ for i=1:n
         Y_Gaus_md=G_predict(data(Lower:upper,:),data(lj:uj,:),training(Lower:upper,21),'M_dist');
         Y_Gaus_soft=G_predict(data(Lower:upper,:),data(lj:uj,:),training(Lower:upper,21),'soft');
         Y_Gaus_B=G_predict(data(Lower:upper,:),data(lj:uj,:),training(Lower:upper,21),'B_input');
-        Y_SVMG=predict(mdn,data(lj:uj,:));
-        Y_SVML=predict(mdn2,data(lj:uj,:));
+        Y=predict(mdn,data(lj:uj,:));
+        Y1=predict(mdn2,data(lj:uj,:));
         Y_RF=str2num(cell2mat(predict(RF,data(lj:uj,:))));
         Y_RF2=str2num(cell2mat(predict(RF2,data(lj:uj,:))));
         Y_NN=net(data(lj:uj,:)');
@@ -91,31 +90,26 @@ for i=1:n
             end
         end
         for x=1:Step
-            Y_com(x)=Y_NN(x)+Y_NN2(x)+Y_RF(x)+Y_RF2(x)+Y_SVML(x)+Y_SVMG(x);
-            if Y_com(x)>=3
-                Y_com(x)=1;
-            else
-                Y_com(x)=0;
-            end
+            Y_com(x)=mode([Y_NN(x),Y_NN2(x),Y_RF(x),Y_knn_ec;
         end
-        Err_svmg(i,j)=ErrorRate(Y_SVMG,training(lj:uj,21));
-        Err_svml(i,j)=ErrorRate(Y_SVML,training(lj:uj,21));
-        Err_KNNec(i,j)=ErrorRate(Y_knn_ec,training(lj:uj,21));
-        Err_KNNmah(i,j)=ErrorRate(Y_knn_mah,training(lj:uj,21));
-        Err_GM(i,j)=ErrorRate(Y_Gaus_md,training(lj:uj,21));
-        Err_GB(i,j)=ErrorRate(Y_Gaus_soft,training(lj:uj,21));
-        Err_GS(i,j)=ErrorRate(Y_Gaus_B,training(lj:uj,21));
-        Err_RF(i,j)=ErrorRate(Y_RF,training(lj:uj,21));
-        Err_NN(i,j)=ErrorRate(Y_NN,training(lj:uj,21));
-        Err_NN2(i,j)=ErrorRate(Y_NN2,training(lj:uj,21));
-        Err_NN_2L(i,j)=ErrorRate(Y_NN_2L,training(lj:uj,21));
-        Err_RF2(i,j)=ErrorRate(Y_RF2,training(lj:uj,21));
-        Err_Com(i,j)=ErrorRate(Y_com,training(lj:uj,21));
+        [Err_svmg(i,j), INDEX_svmg]=ErrorRate(Y,training(lj:uj,21));
+        [Err_svml(i,j), INDEX_svml]=ErrorRate(Y1,training(lj:uj,21));
+        [Err_KNNec(i,j),INDEX_KNNEC]=ErrorRate(Y_knn_ec,training(lj:uj,21));
+        [Err_KNNmah(i,j),INDEX_KNNmah]=ErrorRate(Y_knn_mah,training(lj:uj,21));
+        [Err_GM(i,j),INDEX_GM]=ErrorRate(Y_Gaus_md,training(lj:uj,21));
+        [Err_GB(i,j),INDEX_GB]=ErrorRate(Y_Gaus_soft,training(lj:uj,21));
+        [Err_GS(i,j),INDEX_GS]=ErrorRate(Y_Gaus_B,training(lj:uj,21));
+        [Err_RF(i,j),INDEX_RF]=ErrorRate(Y_RF,training(lj:uj,21));
+        [Err_NN(i,j),INDEX_NN]=ErrorRate(Y_NN,training(lj:uj,21));
+        [Err_NN2(i,j),INDEX_NN2]=ErrorRate(Y_NN2,training(lj:uj,21));
+        [Err_NN_2L(i,j),INDEX_NN_2L]=ErrorRate(Y_NN_2L,training(lj:uj,21));
+        [Err_RF2(i,j),INDEX_RF2]=ErrorRate(Y_RF2,training(lj:uj,21));
+        [Err_com(i,j),INDEX_com=ErrorRate(Y_com,training(lj:uj,21));
         end
         
-        end
+    end
 end
-[P_com(R,1),P_com(R,2)]=MeanSTD(Err_Com);
+[P_com(R,1),P_com(R,2)=MeanSTD(Err_com);
 [P_NN(R,1), P_NN(R,2)]=MeanSTD(Err_NN);
 [P_NN2(R,1), P_NN2(R,2)]=MeanSTD(Err_NN2);
 [P_NN_2L(R,1), P_NN_2L(R,2)]=MeanSTD(Err_NN_2L);
@@ -129,20 +123,3 @@ end
 [P_RF(R,1),P_RF(R,2)]=MeanSTD(Err_RF);
 [P_RF2(R,1),P_RF2(R,2)]=MeanSTD(Err_RF2);
 end
-X=2:F;
-hold all;
-errorbar(X,P_com(2:end,1),P_com(2:end,2));
-errorbar(X,P_NN(2:end,1),P_NN(2:end,2));
-errorbar(X,P_NN2(2:end,1),P_NN2(2:end,2));
-errorbar(X,P_NN_2L(2:end,1),P_NN_2L(2:end,2));
-errorbar(X,P_svmg(2:end,1),P_svmg(2:end,2));
-errorbar(X,P_svml(2:end,1),P_svml(2:end,2));
-errorbar(X,P_KNNec(2:end,1),P_KNNec(2:end,2));
-errorbar(X,P_KNNmah(2:end,1),P_KNNmah(2:end,2));
-errorbar(X,P_GM(2:end,1),P_GM(2:end,2));
-errorbar(X,P_GB(2:end,1),P_GB(2:end,2));
-errorbar(X,P_GS(2:end,1),P_GS(2:end,2));
-errorbar(X,P_RF(2:end,1),P_RF(2:end,2));
-errorbar(X,P_RF2(2:end,1),P_RF2(2:end,2));
-
-
