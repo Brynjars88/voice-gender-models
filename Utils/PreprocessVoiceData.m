@@ -1,4 +1,4 @@
-load voice.txt
+load data/voice.txt
 
 P = randperm(size(voice,1));
 
