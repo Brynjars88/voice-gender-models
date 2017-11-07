@@ -1,8 +1,6 @@
-load '../data/femaleTraining.mat'
-load '../data/maleTraining.mat'
+function [W,b,mu1,mu2,v1,v2] = LDA(C1,C2)
 
-C1 = femaleTraining(:,1:20);
-C2 = maleTraining(:,1:20);
+no_features = size(C1,2);
 
 % Means
 Mu1 = mean(C1)';
@@ -19,32 +17,32 @@ Sw = S1 + S2;
 SB = (Mu1-Mu2)*(Mu1-Mu2)';
 
 % Computing the LDA projection
-Sw = Sw + eye(20)*0.0000001;
+Sw = Sw + eye(no_features)*0.0000001;
 invSw = inv(Sw);
 
 invSw_by_SB = invSw * SB;
 
 % Finding the eigenvectors
-[V,D] = eig(invSw_by_SB);
+[V,~] = eig(invSw_by_SB);
 
 % The eigenvector with the largest eigenvalue and our selected projection
 W = V(:,1);
-
 
 % Training data projected onto W
 PrC1 = C1*W;
 PrC2 = C2*W;
 
-MuP1 = mean(PrC1);
-MuP2 = mean(PrC2);
+mu1 = mean(PrC1);
+mu2 = mean(PrC2);
 
-V1 = var(PrC1);
-V2 = var(PrC2);
+v1 = var(PrC1);
+v2 = var(PrC2);
 
-% Separation point for projected classes
-% S = 
+% Separation/boundary point for projected classes
 
-load '../data/voiceTest.mat'
+b = (mu1+mu2)/2;
+
+end
 
 
 
